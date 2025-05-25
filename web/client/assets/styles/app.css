@@ -398,6 +398,8 @@
 
 /* Code Editor */
 .editor-container {
+    display: flex;
+    flex-direction: column;
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
     overflow: hidden;
@@ -426,7 +428,7 @@
 }
 
 @media (max-width: 1460px) {
-    .editor-container {
+    #body .editor-container {
         height: 640px !important;
     }
 }

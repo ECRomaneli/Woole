@@ -36,7 +36,7 @@ app.component('RequestEditor', {
                     </div>
 
                     <div class="tab-pane h-100 pt-3" :class="{ active: tab === 'body' }">
-                        <code-editor ref="codeEditor" :code="request.body" :type="content.type" :minLines="20" :maxLines="39"></code-editor>
+                        <code-editor ref="codeEditor" :code="request.body" :type="content.type" :minLines="20"></code-editor>
                     </div>
                 </div>
                 
