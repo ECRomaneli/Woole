@@ -48,11 +48,12 @@ type Config struct {
 	ReconnectIntervalStr   string
 	ReconnectInterval      time.Duration
 	available              bool
+	Version                string
 }
 
 var (
 	RedirectTemplate                 = template.FromFile(web.EmbeddedFS, "redirect.html")
-	config           *Config         = &Config{available: false}
+	config           *Config         = &Config{available: false, Version: "{{VERSION}}"}
 	session          *tunnel.Session = &tunnel.Session{}
 	sessionInitiated signal.Signal   = *signal.New()
 	StatusBroker     *channel.Broker = channel.NewBroker()
@@ -106,6 +107,7 @@ func ReadConfig() *Config {
 	sharedKey := flag.String("shared-key", "", "Path to the shared key used to authenticate the client (Only if server requires it)")
 	tlsSkipVerify := flag.Bool("tls-skip-verify", false, "Disables the validation of the integrity of the Server's certificate")
 	tlsCa := flag.String("tls-ca", "", "Path to the TLS CA file. Only for self-signed certificates")
+	showVersion := flag.Bool("version", false, "Print the version")
 
 	flag.Usage = func() {
 		flag.PrintDefaults()
@@ -117,6 +119,12 @@ func ReadConfig() *Config {
 	}
 
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("Woole version: %s\n", config.Version)
+		os.Exit(0)
+	}
+
 	StatusBroker.Start()
 
 	if *httpUrl == constants.DefaultStandaloneMessage {
@@ -144,6 +152,7 @@ func ReadConfig() *Config {
 		MaxReconnectAttempts:   *maxReconnectAttempts,
 		ReconnectIntervalStr:   *reconnectInterval,
 		ReconnectInterval:      parseDurationOrPanic("reconnect-interval", *reconnectInterval),
+		Version:                config.Version,
 		available:              true,
 	}
 

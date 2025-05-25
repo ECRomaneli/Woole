@@ -39,10 +39,11 @@ type Config struct {
 	sharedKey               []byte
 	seed                    []byte
 	available               bool
+	Version                 string
 }
 
 var (
-	config   *Config = &Config{available: false}
+	config   *Config = &Config{available: false, Version: "{{VERSION}}"}
 	configMu sync.Mutex
 )
 
@@ -77,6 +78,7 @@ func ReadConfig() *Config {
 	tunnelResponseTimeout := flag.String("tunnel-response-timeout", "10s", "Timeout to receive a client response. Duration format")
 	tunnelReconnectTimeout := flag.String("tunnel-reconnect-timeout", "10s", "Timeout to reconnect the stream when lose connection. Duration format")
 	tunnelConnectionTimeout := flag.String("tunnel-connection-timeout", "unset", "Timeout for client connections, Duration format")
+	showVersion := flag.Bool("version", false, "Print the version")
 
 	flag.Usage = func() {
 		flag.PrintDefaults()
@@ -91,6 +93,10 @@ func ReadConfig() *Config {
 	}
 	flag.Parse()
 
+	if *showVersion {
+		fmt.Printf("Woole Server version: %s\n", config.Version)
+		os.Exit(0)
+	}
 	if *tunnelRequestSize == "" {
 		tunnelRequestSize = strPointer("2gb")
 	}
@@ -118,6 +124,7 @@ func ReadConfig() *Config {
 		TunnelResponseTimeout:   parseDurationOrPanic("tunnel-response-timeout", *tunnelResponseTimeout),
 		TunnelReconnectTimeout:  parseDurationOrPanic("tunnel-reconnect-timeout", *tunnelReconnectTimeout),
 		TunnelConnectionTimeout: parseDurationOrPanic("tunnel-connection-timeout", *tunnelConnectionTimeout),
+		Version:                 config.Version,
 		available:               true,
 	}
 

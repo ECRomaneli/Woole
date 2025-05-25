@@ -13,8 +13,8 @@ The Dockerfile accepts the following arguments:
   - `client` (default): Builds the Woole client.
   - `server`: Builds the Woole server.
 - **`VERSION`**: Specifies the version of the source code to use. Possible values are:
-  - Branch (default): Uses the `master` branch as default.
-  - Or any specific tag or branch, such as `v1.0.0`.
+  - any specific tag or branch, such as `v1.0.0` or `master`.
+  - or `latest` (default) for last released version (non pre-release).
 
 ### Example:
 

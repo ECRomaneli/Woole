@@ -42,13 +42,30 @@ jobs:
         with:
           go-version: 1.24
 
-      # Build
+      - name: Extract Version from Tag
+        shell: bash
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      # Replace {{ VERSION }} token
+      - name: Replace {{ VERSION }} token
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == macos* ]]; then
+            sed -i '' "s/{{VERSION}}/${{ env.version }}/g" ./internal/app/client/app/settings.go
+            sed -i '' "s/{{VERSION}}/${{ env.version }}/g" ./internal/app/server/app/settings.go
+          else
+            sed -i "s/{{VERSION}}/${{ env.version }}/g" ./internal/app/client/app/settings.go
+            sed -i "s/{{VERSION}}/${{ env.version }}/g" ./internal/app/server/app/settings.go
+          fi
+    
+      # Build Client
       - name: Build Client
         working-directory: ./cmd/client
         run: |
           go build -o woole${{ matrix.extension }} .
           ./woole${{ matrix.extension }} --help
 
+      # Build Server
       - name: Build Server
         working-directory: ./cmd/server
         run: |
@@ -59,19 +76,19 @@ jobs:
       - name: Zip binaries (Unix)
         if: runner.os != 'Windows'
         run: |
-          zip -j woole-${{ matrix.osName }}-${{ matrix.arch }}.zip ./cmd/client/woole ./cmd/server/woole-server
+          zip -j woole-${{ env.version }}-${{ matrix.osName }}-${{ matrix.arch }}.zip ./cmd/client/woole ./cmd/server/woole-server
 
       - name: Zip binaries (Windows)
         if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path (Resolve-Path ./cmd/client/woole.exe), (Resolve-Path ./cmd/server/woole-server.exe) -DestinationPath "woole-${{ matrix.osName }}-${{ matrix.arch }}.zip"
+          Compress-Archive -Path (Resolve-Path ./cmd/client/woole.exe), (Resolve-Path ./cmd/server/woole-server.exe) -DestinationPath "woole-${{ env.version }}-${{ matrix.osName }}-${{ matrix.arch }}.zip"
 
       # Upload ZIP to release
       - name: Upload Release Asset
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: woole-${{ matrix.osName }}-${{ matrix.arch }}.zip
+          files: woole-${{ env.version }}-${{ matrix.osName }}-${{ matrix.arch }}.zip
           fail_on_unmatched_files: true
           prerelease: ${{ contains(github.ref, '-nightly') }}
         env:

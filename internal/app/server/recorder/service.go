@@ -179,6 +179,7 @@ func getHelpPage(clientId string) *tunnel.Response {
 	params := map[string]string{
 		"client_id":  clientId,
 		"tunnel_url": config.GetDomain(),
+		"version":    config.Version,
 	}
 	if config.TunnelPort != strconv.Itoa(constants.DefaultTunnelPort) {
 		params["tunnel_url"] += ":" + config.TunnelPort
