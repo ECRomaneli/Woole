@@ -80,6 +80,7 @@
 | `-shared-key`               | Path to the shared key used to authenticate the client (Only if server requires it) |
 | `-reconnect-attempts`       | Maximum number of reconnection attempts. Use `0` for infinite (default `5`) |
 | `-reconnect-interval`       | Time between reconnection attempts. [Duration format](special-types.md#duration-format) (default `5s`) |
+| `-version`                  | Print the version                                                           |
 
 ## Proxy
 

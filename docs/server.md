@@ -42,6 +42,8 @@ Please note that domains and hosting services are not included with Woole Server
 | `-tunnel-response-size`     | Tunnel maximum response size. [Size format](special-types.md#size-format) (default `2GB`, limited by gRPC) |
 | `-tunnel-response-timeout`  | Timeout to receive a client response. [Duration format](special-types.md#duration-format) (default `10s`)  |
 | `-tunnel-connection-timeout`| Timeout for client connections. [Duration format](special-types.md#duration-format) (default `unset`)      |
+| `-version`                  | Print the version                                                           |
+
 
 ## Hostname Pattern
 
