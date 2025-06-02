@@ -1,6 +1,6 @@
 [<- Go back to "README"](../README.md)
 
-# Server Documentation
+# Woole Server
 
 Woole allows the creation of custom servers. Before setting up a Woole Server, ensure that the necessary ports (HTTP, HTTPS, and Tunnel) are open and properly configured in the firewall, if applicable. Refer to the server provider’s documentation for specific configuration instructions.
 
