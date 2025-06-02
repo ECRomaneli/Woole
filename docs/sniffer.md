@@ -1,6 +1,6 @@
 [<- Go back to "README"](../README.md)
 
-# Sniffing Tool Documentation
+# Sniffing Tool
 
 <p align='center'>
     <a href="https://github.com/ECRomaneli/woole" style='text-decoration:none'>

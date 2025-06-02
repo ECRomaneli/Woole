@@ -1,6 +1,6 @@
 [<- Go back to "README"](../README.md)
 
-# Client Documentation
+# Woole Client
 
 ## Basic Usage
 
