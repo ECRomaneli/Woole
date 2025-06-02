@@ -123,9 +123,9 @@ app.component('CodeEditor', {
             const height = parent.contentRect.height
 
             if (!height) { return }
-            if (!this.fontSize) { this.fontSize = this.editor.getFontSize() + 1 }
+            if (!this.lineHeight) { this.lineHeight = this.editor.renderer.lineHeight }
 
-            let lines = Math.floor(height / this.fontSize)
+            let lines = Math.floor(height / this.lineHeight)
 
             if (lines < this.minLines) { lines = this.minLines }
             else if (lines > this.maxLines) { lines = this.maxLines }
