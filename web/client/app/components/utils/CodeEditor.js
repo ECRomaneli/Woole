@@ -79,8 +79,10 @@ app.component('CodeEditor', {
 
                 this.setEditorMode(this.type)
                 if (this.code && this.code.length > 10000) {
-                    this.setCode(this.code.substring(0, 10000))
-                    setTimeout(() => { this.setCode(this.code) }, 1500)
+                    this.setCode("Loading code...")
+                    setTimeout(() => {
+                        this.setCode(this.code, false)
+                    }, 2000)
                 } else {
                     this.setCode(this.code)
                 }
