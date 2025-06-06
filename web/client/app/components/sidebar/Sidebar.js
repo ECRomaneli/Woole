@@ -143,7 +143,7 @@ app.component('Sidebar', {
         },
 
         filterRecords(recordList) {
-            this.filteredRecordList = SearchEngine.search(recordList, this.inputSearch, this.excludeFromSearch)
+            this.filteredRecordList = SearchEngine.search(recordList, this.inputSearch, { excludeKeys: this.excludeFromSearch, matchChildKeysAsValues: true })
             this.postponeEmitFilterRecords()
         },
 
