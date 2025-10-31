@@ -118,7 +118,7 @@ func getClient(hs *tunnel.Handshake, clientIp string) (*adt.Client, error) {
 	client, err := clientManager.RecoverSession(hs.ClientId, hs.Bearer)
 
 	if err != nil {
-		log.Error(clientCandidate.LogPrefix(), "-", err.Error())
+		log.Info(clientCandidate.LogPrefix(), "-", err.Error())
 		return nil, err
 	}
 
@@ -136,8 +136,10 @@ func getClient(hs *tunnel.Handshake, clientIp string) (*adt.Client, error) {
 	}
 
 	client.IpAddress = clientIp
+
 	log.Info(client.LogPrefix(), "- Session Started")
 	clientManager.DeregisterOnTimeout(client.Id, func() { log.Info(client.LogPrefix(), "- Session Finished") })
+
 	return client, nil
 }
 

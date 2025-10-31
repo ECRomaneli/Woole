@@ -28,8 +28,8 @@ func NewClient(clientId string, bearer []byte) *Client {
 		IdleTimeout:   time.NewTimer(time.Minute),
 	}
 
-	if !client.Connect() {
-		panic("Failed to connect client")
+	if !client.StopIdleTimeout() {
+		panic("failed to connect client")
 	}
 
 	return client
@@ -76,7 +76,7 @@ func (cl *Client) SetIdleTimeout(duration time.Duration) bool {
 	return cl.IdleTimeout.Reset(duration)
 }
 
-func (cl *Client) Connect() bool {
+func (cl *Client) StopIdleTimeout() bool {
 	cl.IsIdle = false
 	return cl.IdleTimeout.Stop()
 }

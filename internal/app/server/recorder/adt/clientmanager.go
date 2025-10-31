@@ -21,7 +21,7 @@ func (cm *ClientManager) Register(clientId string, bearer []byte, newBearer []by
 	clientId = cm.generateClientId(clientId)
 
 	if len(bearer) != 0 && !cm.bearerEquals(bearer, newBearer) {
-		return nil, errors.New("failed to authenticate client from other server")
+		return nil, errors.New("unknown client bearer")
 	}
 
 	client := NewClient(clientId, newBearer)
@@ -60,7 +60,7 @@ func (cm *ClientManager) RecoverSession(clientId string, bearer []byte) (*Client
 	}
 
 	if !cm.bearerEquals(client.Bearer, bearer) {
-		return nil, errors.New("failed to authenticate the client")
+		return nil, errors.New("client bearer did not match")
 	}
 
 	return client, nil

@@ -58,7 +58,7 @@ func (_t *Tunnel) Tunnel(stream tunnel.Tunnel_TunnelServer) error {
 		return err
 	}
 
-	client.Connect()
+	client.StopIdleTimeout()
 	log.Info(client.LogPrefix(), "- Tunnel Connected")
 
 	var expireAt int64 = 0
