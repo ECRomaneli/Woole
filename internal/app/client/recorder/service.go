@@ -1,7 +1,6 @@
 package recorder
 
 import (
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -55,15 +54,7 @@ func GetRecords() *adt.Records {
 // Returns:
 // - A boolean indicating whether the connection was successfully established.
 // - An error if the connection failed or was interrupted.
-func onTunnelStart(client tunnel.TunnelClient, ctx context.Context, cancelCtx context.CancelFunc) (bool, error) {
-	defer cancelCtx()
-
-	// Start the tunnel stream
-	stream, err := client.Tunnel(ctx)
-	if !handleGRPCErrors(err) {
-		return false, err
-	}
-
+func onTunnelStart(stream tunnel.Tunnel_TunnelClient) (bool, error) {
 	// Send the handshake
 	stream.Send(&tunnel.ClientMessage{Handshake: config.GetHandshake()})
 
@@ -124,7 +115,7 @@ func handleServerRequest(stream tunnel.Tunnel_TunnelClient, serverRecord *tunnel
 
 	err := stream.Send(&tunnel.ClientMessage{Record: record.ThinClone(tunnel.Step_RESPONSE)})
 	if !handleGRPCErrors(err) {
-		log.Error("Failed to send response for Record[", record.Id, "].", err)
+		log.Error("Failed to send response for Record ID "+record.Id+":", err)
 	}
 
 	records.AddRecordAndPublish(record)
@@ -138,7 +129,7 @@ func handleServerElapsed(serverRecord *tunnel.Record) {
 	rec := records.GetByServerId(serverRecord.Id)
 
 	if rec == nil {
-		log.Warn("Record [", serverRecord.Id, "] is not available")
+		log.Error("Record ID " + serverRecord.Id + " is not available")
 		return
 	}
 
@@ -264,6 +255,7 @@ func handleGRPCErrors(err error) bool {
 		log.Warn("Request discarded. Reason: Max size exceeded")
 		return true
 	default:
+		log.Error("gRPC error:", status.Code(err).String(), "("+err.Error()+")")
 		return false
 	}
 }

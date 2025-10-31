@@ -16,21 +16,20 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/status"
 )
 
-func startConnectionWithServer(contextHandler func(tunnel.TunnelClient, context.Context, context.CancelFunc) (bool, error)) {
+func startConnectionWithServer(onTunnelStart func(tunnel.Tunnel_TunnelClient) (bool, error)) {
 	log.SetLogLevelStr(config.LogLevel)
 
-	firstConn := true
 	var err error
 
 	for attempt := -1; attempt <= config.MaxReconnectAttempts; attempt++ {
-		if firstConn {
-			firstConn = false
+		if err == nil {
 			app.ChangeStatusAndPublish(tunnel.Status_CONNECTING)
 		} else {
-			isRetriable := isRetriable(err, attempt == config.MaxReconnectAttempts)
+			isRetriable := isRetriable(err, attempt >= config.MaxReconnectAttempts)
 			if !isRetriable {
 				app.ChangeStatusAndPublish(tunnel.Status_DISCONNECTED)
 				return
@@ -46,8 +45,17 @@ func startConnectionWithServer(contextHandler func(tunnel.TunnelClient, context.
 			continue
 		}
 
-		connEstablished, tunnelErr := contextHandler(client, ctx, cancelCtx)
+		// Start the tunnel stream
+		stream, establishErr := client.Tunnel(ctx)
+		if establishErr != nil {
+			err = establishErr
+			cancelCtx()
+			continue
+		}
+
+		connEstablished, tunnelErr := onTunnelStart(stream)
 		err = tunnelErr
+		cancelCtx()
 
 		if connEstablished {
 			attempt = -1
@@ -117,9 +125,17 @@ func setProxyTimeout() {
 
 func connectClient(enableTransportCredentials bool) (tunnel.TunnelClient, context.Context, context.CancelFunc, error) {
 	// Opts
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt32)))
-	opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32)))
+	keepaliveParams := keepalive.ClientParameters{
+		Time:                1 * time.Minute,
+		Timeout:             20 * time.Second,
+		PermitWithoutStream: true,
+	}
+
+	opts := []grpc.DialOption{
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt32)),
+		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(math.MaxInt32)),
+		grpc.WithKeepaliveParams(keepaliveParams),
+	}
 
 	if enableTransportCredentials {
 		opts = append(opts, grpc.WithTransportCredentials(config.GetTransportCredentials()))
