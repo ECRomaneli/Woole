@@ -3,7 +3,6 @@ package recorder
 import (
 	"context"
 	"net/http"
-	"time"
 	"woole/internal/pkg/tunnel"
 
 	"github.com/ecromaneli-golang/http/webserver"
@@ -61,18 +60,15 @@ func (_t *Tunnel) Tunnel(stream tunnel.Tunnel_TunnelServer) error {
 	client.StopIdleTimeout()
 	log.Info(client.LogPrefix(), "- Tunnel Connected")
 
-	var expireAt int64 = 0
-
 	if config.TunnelConnectionTimeout != 0 {
-		deadline := time.Now().Add(config.TunnelConnectionTimeout)
-		expireAt = deadline.Unix()
-		cancelableCtx, cancel := context.WithDeadline(stream.Context(), deadline)
+		client.SetExpireAt(config.TunnelConnectionTimeout)
+		cancelableCtx, cancel := context.WithDeadline(stream.Context(), client.ExpireAt)
 		ctx = cancelableCtx
 		defer cancel()
 	}
 
 	// Send session
-	stream.Send(&tunnel.ServerMessage{Session: createSession(client, expireAt)})
+	stream.Send(&tunnel.ServerMessage{Session: createSession(client)})
 
 	if !handleGRPCErrors(err) {
 		return err
@@ -91,7 +87,7 @@ func (_t *Tunnel) Tunnel(stream tunnel.Tunnel_TunnelServer) error {
 		log.Info(client.LogPrefix(), "- Tunnel Disconnected")
 		client.SetIdleTimeout(config.TunnelReconnectTimeout)
 	} else {
-		log.Info(client.LogPrefix(), "- Tunnel Expired")
+		log.Info(client.LogPrefix(), "- Session Expired")
 		client.SetIdleTimeout(0)
 	}
 

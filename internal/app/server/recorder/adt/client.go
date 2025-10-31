@@ -17,6 +17,7 @@ type Client struct {
 	RecordChannel chan *tunnel.Record
 	IdleTimeout   *time.Timer
 	IsIdle        bool
+	ExpireAt      time.Time
 }
 
 func NewClient(clientId string, bearer []byte) *Client {
@@ -91,4 +92,18 @@ func (cl *Client) putRecord(recordId string, record *Record) {
 	cl.rw.Lock()
 	defer cl.rw.Unlock()
 	cl.records[recordId] = record
+}
+
+func (cl *Client) Close() {
+	cl.rw.Lock()
+	defer cl.rw.Unlock()
+	cl.IdleTimeout.Stop()
+	// cl.records = nil
+	close(cl.RecordChannel)
+}
+
+func (cl *Client) SetExpireAt(expireAt time.Duration) {
+	cl.rw.Lock()
+	defer cl.rw.Unlock()
+	cl.ExpireAt = time.Now().Add(expireAt)
 }

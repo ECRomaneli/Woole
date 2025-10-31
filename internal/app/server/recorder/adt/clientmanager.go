@@ -31,15 +31,13 @@ func (cm *ClientManager) Register(clientId string, bearer []byte, newBearer []by
 }
 
 func (cm *ClientManager) Deregister(clientId string) {
-	client := cm.clients[clientId]
-
-	client.IdleTimeout.Stop()
-	close(client.RecordChannel)
+	client := cm.Get(clientId)
+	client.Close()
 	cm.put(clientId, nil)
 }
 
 func (cm *ClientManager) DeregisterOnTimeout(clientId string, callback func()) {
-	client := cm.clients[clientId]
+	client := cm.Get(clientId)
 
 	go func() {
 		<-client.IdleTimeout.C

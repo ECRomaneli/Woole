@@ -81,18 +81,23 @@ func receiveClientMessage(stream tunnel.Tunnel_TunnelServer, client *adt.Client)
 	}
 }
 
-func createSession(client *adt.Client, expireAt int64) *tunnel.Session {
+func createSession(client *adt.Client) *tunnel.Session {
 	hostname := strings.Replace(config.HostnamePattern, constants.ClientToken, client.Id, 1)
 
 	auth := &tunnel.Session{
 		ClientId:        client.Id,
 		Hostname:        hostname,
 		HttpPort:        config.HttpPort,
-		ExpireAt:        expireAt,
 		MaxRequestSize:  int32(config.TunnelRequestSize),
 		MaxResponseSize: int32(config.TunnelResponseSize),
 		ResponseTimeout: int64(config.TunnelResponseTimeout),
 		Bearer:          client.Bearer,
+	}
+
+	if client.ExpireAt.IsZero() {
+		auth.ExpireAt = 0
+	} else {
+		auth.ExpireAt = client.ExpireAt.Unix()
 	}
 
 	if config.HasTlsFiles() {

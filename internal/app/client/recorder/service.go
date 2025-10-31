@@ -66,14 +66,14 @@ func onTunnelStart(stream tunnel.Tunnel_TunnelClient) (bool, error) {
 
 	var expireAt string
 	if app.HasSession() {
-		log.Info("[", config.TunnelUrl.String(), "]", "Connection Reestablished")
+		log.Info("["+config.TunnelUrl.String()+"]", "Connection Reestablished")
 		expireAt = app.ExpireAt()
 	}
 
 	app.SetSession(serverMsg.Session)
 
 	if expireAt != "" && app.ExpireAt() != expireAt {
-		log.Info("[", config.TunnelUrl.String(), "]", "New Session ExpireAt:", app.ExpireAt())
+		log.Info("["+config.TunnelUrl.String()+"]", "New Session ExpireAt:", app.ExpireAt())
 	}
 
 	// Reset old IDs
