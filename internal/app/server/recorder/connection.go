@@ -3,12 +3,14 @@ package recorder
 import (
 	"net"
 	"net/http"
+	"time"
 	"woole/internal/pkg/tunnel"
 
 	web "woole/web/server"
 
 	"github.com/ecromaneli-golang/http/webserver"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 func serveWebServer() {
@@ -39,9 +41,25 @@ func serveTunnel() {
 	panicIfNotNil(err)
 
 	// Opts
-	var opts []grpc.ServerOption
-	opts = append(opts, grpc.MaxRecvMsgSize(config.TunnelResponseSize))
-	opts = append(opts, grpc.MaxSendMsgSize(config.TunnelRequestSize))
+	kaep := keepalive.EnforcementPolicy{
+		MinTime:             1 * time.Minute,
+		PermitWithoutStream: true,
+	}
+
+	kasp := keepalive.ServerParameters{
+		// MaxConnectionIdle:     15 * time.Minute,
+		// MaxConnectionAge:      30 * time.Minute,
+		// MaxConnectionAgeGrace: 5 * time.Second,
+		Time:    30 * time.Minute,
+		Timeout: 20 * time.Second,
+	}
+
+	opts := []grpc.ServerOption{
+		grpc.KeepaliveEnforcementPolicy(kaep),
+		grpc.KeepaliveParams(kasp),
+		grpc.MaxRecvMsgSize(config.TunnelResponseSize),
+		grpc.MaxSendMsgSize(config.TunnelRequestSize),
+	}
 
 	if config.HasTlsFiles() {
 		opts = append(opts, grpc.Creds(config.GetTransportCredentials()))
