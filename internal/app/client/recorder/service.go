@@ -255,7 +255,6 @@ func handleGRPCErrors(err error) bool {
 		log.Warn("Request discarded. Reason: Max size exceeded")
 		return true
 	default:
-		log.Error("gRPC error:", status.Code(err).String(), "("+err.Error()+")")
 		return false
 	}
 }
