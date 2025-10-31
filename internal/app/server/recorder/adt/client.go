@@ -17,6 +17,7 @@ type Client struct {
 	RecordChannel chan *tunnel.Record
 	IdleTimeout   *time.Timer
 	IsIdle        bool
+	ExpireAt      time.Time
 }
 
 func NewClient(clientId string, bearer []byte) *Client {
@@ -28,8 +29,8 @@ func NewClient(clientId string, bearer []byte) *Client {
 		IdleTimeout:   time.NewTimer(time.Minute),
 	}
 
-	if !client.Connect() {
-		panic("Failed to connect client")
+	if !client.StopIdleTimeout() {
+		panic("failed to connect client")
 	}
 
 	return client
@@ -76,7 +77,7 @@ func (cl *Client) SetIdleTimeout(duration time.Duration) bool {
 	return cl.IdleTimeout.Reset(duration)
 }
 
-func (cl *Client) Connect() bool {
+func (cl *Client) StopIdleTimeout() bool {
 	cl.IsIdle = false
 	return cl.IdleTimeout.Stop()
 }
@@ -91,4 +92,18 @@ func (cl *Client) putRecord(recordId string, record *Record) {
 	cl.rw.Lock()
 	defer cl.rw.Unlock()
 	cl.records[recordId] = record
+}
+
+func (cl *Client) Close() {
+	cl.rw.Lock()
+	defer cl.rw.Unlock()
+	cl.IdleTimeout.Stop()
+	// cl.records = nil
+	close(cl.RecordChannel)
+}
+
+func (cl *Client) SetExpireAt(expireAt time.Duration) {
+	cl.rw.Lock()
+	defer cl.rw.Unlock()
+	cl.ExpireAt = time.Now().Add(expireAt)
 }

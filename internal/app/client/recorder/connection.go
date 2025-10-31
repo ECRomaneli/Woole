@@ -174,17 +174,21 @@ func isRetriable(err error, aborted bool) bool {
 	errStatus, ok := status.FromError(err)
 
 	if !ok || !isRecoverable(err) || !app.HasSession() || aborted {
-		log.Fatal("[", config.TunnelUrl.String(), "]", errStatus.Code(), "-", errStatus.Message())
-		log.Fatal("[", config.TunnelUrl.String(), "]", "Failed to connect with tunnel")
+		if status.Code(err) == codes.DeadlineExceeded {
+			log.Info("["+config.TunnelUrl.String()+"]", "Session expired")
+		} else {
+			log.Fatal("["+config.TunnelUrl.String()+"]", errStatus.Code(), "-", errStatus.Message())
+			log.Fatal("["+config.TunnelUrl.String()+"]", "Failed to connect with tunnel")
+		}
 		return false
 	}
 
-	log.Error("[", config.TunnelUrl.String(), "]", errStatus.Code(), "-", errStatus.Message())
+	log.Error("["+config.TunnelUrl.String()+"]", errStatus.Code(), "-", errStatus.Message())
 	if config.ReconnectInterval > 0 {
-		log.Warn("[", config.TunnelUrl.String(), "]", "Trying to reconnect in", config.ReconnectIntervalStr, "...")
+		log.Warn("["+config.TunnelUrl.String()+"]", "Trying to reconnect in", config.ReconnectIntervalStr, "...")
 		<-time.After(config.ReconnectInterval)
 	} else {
-		log.Warn("[", config.TunnelUrl.String(), "]", "Trying to reconnect...")
+		log.Warn("["+config.TunnelUrl.String()+"]", "Trying to reconnect...")
 	}
 	return true
 }
