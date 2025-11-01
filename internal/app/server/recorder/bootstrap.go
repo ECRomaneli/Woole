@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	config        = app.ReadConfig()
-	log           = logger.New("recorder")
-	clientManager = adt.NewClientManager()
+	config         = app.ReadConfig()
+	log            = logger.New("recorder")
+	sessionManager = adt.NewSessionManager()
 )
 
 type Tunnel struct {
