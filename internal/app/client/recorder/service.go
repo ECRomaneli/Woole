@@ -188,9 +188,11 @@ func updateReverseProxy(record *adt.Record, location string) {
 		return
 	}
 
-	config.ProxyUrl = iurl.RawUrlToUrl(locationUrl.Hostname(), locationUrl.Scheme, locationUrl.Port())
-	proxyHandler = CreateProxyHandler(config.ProxyUrl)
-	log.Warn("Proxy changed to \"" + config.ProxyUrl.String() + "\"")
+	if locationUrl.Hostname() != "" {
+		config.ProxyUrl = iurl.RawUrlToUrl(locationUrl.Hostname(), locationUrl.Scheme, locationUrl.Port())
+		proxyHandler = CreateProxyHandler(config.ProxyUrl)
+		log.Warn("Proxy changed to \"" + config.ProxyUrl.String() + "\"")
+	}
 
 	newLocation, _ := iurl.ReplaceHostByUsingExampleStr(locationUrl.String(), record.Request.Url)
 	record.Response.SetHeader("Location", newLocation.String())
