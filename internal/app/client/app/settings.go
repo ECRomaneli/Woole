@@ -5,8 +5,10 @@ import (
 	"crypto/x509"
 	"flag"
 	"fmt"
+	"net"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 	"woole/internal/pkg/constants"
@@ -135,7 +137,7 @@ func ReadConfig() *Config {
 		ClientId:               *clientId,
 		ClientKey:              rand.RandMD5(*clientId),
 		HttpUrl:                iurl.RawUrlToUrl(*httpUrl, "http", constants.DefaultStandalonePort),
-		ProxyUrl:               iurl.RawUrlToUrl(*proxyUrl, "http", ""),
+		ProxyUrl:               iurl.RawUrlToUrl(*proxyUrl, detectProtocol(*proxyUrl), ""),
 		TunnelUrl:              iurl.RawUrlToUrl(*tunnelUrl, "grpc", constants.DefaultTunnelPortStr),
 		SnifferUrl:             iurl.RawUrlToUrl(*snifferPort, "http", constants.DefaultSnifferPort),
 		MaxRecords:             *maxRecords,
@@ -204,6 +206,54 @@ func (cfg *Config) GetHandshake() *tunnel.Handshake {
 		Bearer:    session.Bearer,
 		SharedKey: sharedKey,
 	}
+}
+
+func detectProtocol(host string) string {
+	// Extract only the host (remove path if exists)
+	if idx := strings.Index(host, "/"); idx != -1 {
+		host = host[:idx]
+	}
+
+	// Try HTTPS connection first
+	if supportsHTTPS(host) {
+		return "https"
+	}
+
+	return "http"
+}
+
+func supportsHTTPS(host string) bool {
+	// Add default port if not specified
+	address := host
+	if !strings.Contains(host, ":") {
+		address = net.JoinHostPort(host, "443")
+	}
+
+	// Short timeout to avoid blocking
+	conn, err := net.DialTimeout("tcp", address, 3*time.Second)
+	if err != nil {
+		return false
+	}
+	defer conn.Close()
+
+	// Extract hostname for TLS ServerName (remove port if present)
+	hostname := host
+	if idx := strings.LastIndex(host, ":"); idx != -1 {
+		hostname = host[:idx]
+	}
+
+	// Try TLS handshake
+	tlsConn := tls.Client(conn, &tls.Config{
+		ServerName:         hostname,
+		InsecureSkipVerify: false, // Validate certificate
+	})
+	defer tlsConn.Close()
+
+	// Set timeout for handshake
+	tlsConn.SetDeadline(time.Now().Add(3 * time.Second))
+
+	err = tlsConn.Handshake()
+	return err == nil
 }
 
 func loadSharedKey(path string) ([]byte, error) {
