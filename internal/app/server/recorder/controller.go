@@ -20,18 +20,18 @@ func recorderHandler(req *webserver.Request, res *webserver.Response) {
 		return
 	}
 
-	client := clientManager.Get(clientId)
+	client := sessionManager.Get(clientId)
 
 	if client.IsIdle {
 		res.Status(http.StatusServiceUnavailable).WriteText("Session started but not in use")
-		log.Warn(getClientLog(clientId, "Trying to use an idle client"))
+		log.Warn(getSessionLog(clientId, "Trying to use an idle client"))
 		return
 	}
 
 	record, err := getRecordWhenReady(client, req)
 
 	if err != nil {
-		log.Warn(getClientLog(clientId, err.Error()))
+		log.Warn(getSessionLog(clientId, err.Error()))
 	}
 
 	res.Headers(record.Response.GetHttpHeader()).Status(int(record.Response.Code)).Write(record.Response.Body)
@@ -51,44 +51,44 @@ func (_t *Tunnel) Tunnel(stream tunnel.Tunnel_TunnelServer) error {
 		return err
 	}
 
-	// Recover client session if exists
-	client, err := getClient(hs.Handshake, getContextIp(ctx))
+	// Recover session if exists
+	session, err := createOrRetrieveSession(hs.Handshake, getContextIp(ctx))
 	if err != nil {
 		return err
 	}
 
-	client.StopIdleTimeout()
-	log.Info(client.LogPrefix(), "- Tunnel Connected")
+	session.StopIdleTimeout()
+	log.Info(session.LogPrefix(), "- Tunnel Connected")
 
 	if config.TunnelConnectionTimeout != 0 {
-		client.SetExpireAt(config.TunnelConnectionTimeout)
-		cancelableCtx, cancel := context.WithDeadline(stream.Context(), client.ExpireAt)
+		session.SetExpireAt(config.TunnelConnectionTimeout)
+		cancelableCtx, cancel := context.WithDeadline(stream.Context(), session.ExpireAt)
 		ctx = cancelableCtx
 		defer cancel()
 	}
 
 	// Send session
-	stream.Send(&tunnel.ServerMessage{Session: createSession(client)})
+	stream.Send(&tunnel.ServerMessage{Session: toProtoSession(session)})
 
 	if !handleGRPCErrors(err) {
 		return err
 	}
 
 	// Listen for HTTP responses from client
-	go receiveClientMessage(stream, client)
+	go receiveClientMessage(stream, session)
 
 	// Send new HTTP requests to client
-	go sendServerMessage(stream, client)
+	go sendServerMessage(stream, session)
 
 	// Wait the end-of-stream
 	<-ctx.Done()
 
 	if ctx.Err() != context.DeadlineExceeded {
-		log.Info(client.LogPrefix(), "- Tunnel Disconnected")
-		client.SetIdleTimeout(config.TunnelReconnectTimeout)
+		log.Info(session.LogPrefix(), "- Tunnel Disconnected")
+		session.SetIdleTimeout(config.TunnelReconnectTimeout)
 	} else {
-		log.Info(client.LogPrefix(), "- Session Expired")
-		client.SetIdleTimeout(0)
+		log.Info(session.LogPrefix(), "- Session Expired")
+		session.SetIdleTimeout(0)
 	}
 
 	return ctx.Err()
@@ -105,8 +105,8 @@ func hasClient(clientId string) bool {
 		return false
 	}
 
-	if !clientManager.Exists(clientId) {
-		log.Warn(getClientLog(clientId, "client ID is not in use"))
+	if !sessionManager.Exists(clientId) {
+		log.Warn(getSessionLog(clientId, "client ID is not in use"))
 		return false
 	}
 

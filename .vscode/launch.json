@@ -131,6 +131,44 @@
             ]
         },
         {
+            "name": "Client Loop 1",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/client",
+            "args": [
+                "-proxy", "https://test-loop-2.woole.me/",
+                "-client", "test-loop-1",
+                "-tunnel", "woole.me"
+            ]
+        },
+        {
+            "name": "Client Loop 2",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/client",
+            "args": [
+                "-proxy", "https://test-loop-1.woole.me/",
+                "-client", "test-loop-2",
+                "-tunnel", "woole.me",
+                "-sniffer", "8001"
+            ]
+        },
+        {
+            "name": "Client Loop 2 w/ redirection",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/client",
+            "args": [
+                "-proxy", "github.com",
+                "-client", "test-loop-2",
+                "-tunnel", "woole.me",
+                "-sniffer", "8001"
+            ]
+        },
+        {
             "name": "Domain Client",
             "type": "go",
             "request": "launch",

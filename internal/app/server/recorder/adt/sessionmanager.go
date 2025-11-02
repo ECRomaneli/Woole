@@ -8,35 +8,35 @@ import (
 	"woole/pkg/rand"
 )
 
-type ClientManager struct {
+type SessionManager struct {
 	mu      sync.Mutex
-	clients map[string]*Client
+	clients map[string]*Session
 }
 
-func NewClientManager() *ClientManager {
-	return &ClientManager{clients: make(map[string]*Client)}
+func NewSessionManager() *SessionManager {
+	return &SessionManager{clients: make(map[string]*Session)}
 }
 
-func (cm *ClientManager) Register(clientId string, bearer []byte, newBearer []byte) (*Client, error) {
+func (cm *SessionManager) Register(clientId string, bearer []byte, newBearer []byte) (*Session, error) {
 	clientId = cm.generateClientId(clientId)
 
 	if len(bearer) != 0 && !cm.bearerEquals(bearer, newBearer) {
 		return nil, errors.New("unknown client bearer")
 	}
 
-	client := NewClient(clientId, newBearer)
+	client := NewSession(clientId, newBearer)
 	cm.put(clientId, client)
 
 	return client, nil
 }
 
-func (cm *ClientManager) Deregister(clientId string) {
+func (cm *SessionManager) Deregister(clientId string) {
 	client := cm.Get(clientId)
 	client.Close()
 	cm.put(clientId, nil)
 }
 
-func (cm *ClientManager) DeregisterOnTimeout(clientId string, callback func()) {
+func (cm *SessionManager) DeregisterOnTimeout(clientId string, callback func()) {
 	client := cm.Get(clientId)
 
 	go func() {
@@ -46,7 +46,7 @@ func (cm *ClientManager) DeregisterOnTimeout(clientId string, callback func()) {
 	}()
 }
 
-func (cm *ClientManager) RecoverSession(clientId string, bearer []byte) (*Client, error) {
+func (cm *SessionManager) RecoverSession(clientId string, bearer []byte) (*Session, error) {
 	if len(bearer) == 0 {
 		return nil, nil
 	}
@@ -64,15 +64,15 @@ func (cm *ClientManager) RecoverSession(clientId string, bearer []byte) (*Client
 	return client, nil
 }
 
-func (cm *ClientManager) Get(clientId string) *Client {
+func (cm *SessionManager) Get(clientId string) *Session {
 	return cm.clients[clientId]
 }
 
-func (cm *ClientManager) Exists(clientId string) bool {
+func (cm *SessionManager) Exists(clientId string) bool {
 	return cm.clients[clientId] != nil
 }
 
-func (cm *ClientManager) bearerEquals(bearer1 []byte, bearer2 []byte) bool {
+func (cm *SessionManager) bearerEquals(bearer1 []byte, bearer2 []byte) bool {
 	if len(bearer1) == 0 || len(bearer2) == 0 {
 		return false
 	}
@@ -80,7 +80,7 @@ func (cm *ClientManager) bearerEquals(bearer1 []byte, bearer2 []byte) bool {
 	return bytes.Equal(bearer1, bearer2)
 }
 
-func (cm *ClientManager) generateClientId(clientId string) string {
+func (cm *SessionManager) generateClientId(clientId string) string {
 	hasClientId := clientId != ""
 
 	if !hasClientId {
@@ -94,7 +94,7 @@ func (cm *ClientManager) generateClientId(clientId string) string {
 	return clientId
 }
 
-func (cm *ClientManager) put(clientId string, client *Client) {
+func (cm *SessionManager) put(clientId string, client *Session) {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 	cm.clients[clientId] = client

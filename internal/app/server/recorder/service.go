@@ -21,15 +21,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func getRecordWhenReady(client *adt.Client, req *webserver.Request) (*adt.Record, error) {
+func getRecordWhenReady(session *adt.Session, req *webserver.Request) (*adt.Record, error) {
 	record := adt.NewRecord((&tunnel.Request{}).FromHTTPRequest(req))
 	record.Step = tunnel.Step_REQUEST
-	client.AddRecord(record)
+	session.AddRecord(record)
 
 	var err error
 
 	elapsed := timer.Exec(func() {
-		defer client.RemoveRecord(record.Id)
+		defer session.RemoveRecord(record.Id)
 
 		select {
 		case <-record.OnResponse.Receive():
@@ -46,13 +46,13 @@ func getRecordWhenReady(client *adt.Client, req *webserver.Request) (*adt.Record
 	}
 
 	record.Response.ServerElapsed = elapsed
-	client.SendServerElapsed(record)
+	session.SendServerElapsed(record)
 
 	return record, nil
 }
 
-func sendServerMessage(stream tunnel.Tunnel_TunnelServer, client *adt.Client) {
-	for record := range client.RecordChannel {
+func sendServerMessage(stream tunnel.Tunnel_TunnelServer, session *adt.Session) {
+	for record := range session.RecordChannel {
 		err := stream.Send(&tunnel.ServerMessage{Record: record})
 
 		if !handleGRPCErrors(err) {
@@ -61,7 +61,7 @@ func sendServerMessage(stream tunnel.Tunnel_TunnelServer, client *adt.Client) {
 	}
 }
 
-func receiveClientMessage(stream tunnel.Tunnel_TunnelServer, client *adt.Client) {
+func receiveClientMessage(stream tunnel.Tunnel_TunnelServer, session *adt.Session) {
 	for {
 		tunnelRes, err := stream.Recv()
 
@@ -75,29 +75,29 @@ func receiveClientMessage(stream tunnel.Tunnel_TunnelServer, client *adt.Client)
 		}
 
 		if err == nil {
-			client.SetRecordResponse(tunnelRes.Record.Id, tunnelRes.Record.Response)
+			session.SetRecordResponse(tunnelRes.Record.Id, tunnelRes.Record.Response)
 		}
 
 	}
 }
 
-func createSession(client *adt.Client) *tunnel.Session {
-	hostname := strings.Replace(config.HostnamePattern, constants.ClientToken, client.Id, 1)
+func toProtoSession(session *adt.Session) *tunnel.Session {
+	hostname := strings.Replace(config.HostnamePattern, constants.ClientToken, session.Id, 1)
 
 	auth := &tunnel.Session{
-		ClientId:        client.Id,
+		ClientId:        session.Id,
 		Hostname:        hostname,
 		HttpPort:        config.HttpPort,
 		MaxRequestSize:  int32(config.TunnelRequestSize),
 		MaxResponseSize: int32(config.TunnelResponseSize),
 		ResponseTimeout: int64(config.TunnelResponseTimeout),
-		Bearer:          client.Bearer,
+		Bearer:          session.Bearer,
 	}
 
-	if client.ExpireAt.IsZero() {
+	if session.ExpireAt.IsZero() {
 		auth.ExpireAt = 0
 	} else {
-		auth.ExpireAt = client.ExpireAt.Unix()
+		auth.ExpireAt = session.ExpireAt.Unix()
 	}
 
 	if config.HasTlsFiles() {
@@ -107,54 +107,54 @@ func createSession(client *adt.Client) *tunnel.Session {
 	return auth
 }
 
-func getClient(hs *tunnel.Handshake, clientIp string) (*adt.Client, error) {
-	clientCandidate := &adt.Client{
+func createOrRetrieveSession(hs *tunnel.Handshake, clientIp string) (*adt.Session, error) {
+	sessionCandidate := &adt.Session{
 		Id:        hs.ClientId,
 		IpAddress: clientIp,
 	}
 
 	err := app.AuthClient(hs.SharedKey)
 	if err != nil {
-		log.Error(clientCandidate.LogPrefix(), "-", err.Error())
+		log.Error(sessionCandidate.LogPrefix(), "-", err.Error())
 		return nil, err
 	}
 
-	// Recover client session if exists
-	client, err := clientManager.RecoverSession(hs.ClientId, hs.Bearer)
+	// Recover session if exists
+	session, err := sessionManager.RecoverSession(hs.ClientId, hs.Bearer)
 
 	if err != nil {
-		log.Info(clientCandidate.LogPrefix(), "-", err.Error())
+		log.Info(sessionCandidate.LogPrefix(), "-", err.Error())
 		return nil, err
 	}
 
-	if client != nil {
-		client.IpAddress = clientIp
-		return client, nil
+	if session != nil {
+		session.IpAddress = clientIp
+		return session, nil
 	}
 
 	// Create session or try recover from other server with the same key
-	client, err = clientManager.Register(hs.ClientId, hs.Bearer, app.GenerateBearer(hs.ClientKey))
+	session, err = sessionManager.Register(hs.ClientId, hs.Bearer, app.GenerateBearer(hs.ClientKey))
 
 	if err != nil {
-		log.Error(clientCandidate.LogPrefix(), "-", err.Error())
+		log.Error(sessionCandidate.LogPrefix(), "-", err.Error())
 		return nil, err
 	}
 
-	client.IpAddress = clientIp
+	session.IpAddress = clientIp
 
-	log.Info(client.LogPrefix(), "- Session Started")
-	clientManager.DeregisterOnTimeout(client.Id, func() { log.Info(client.LogPrefix(), "- Session Finished") })
+	log.Info(session.LogPrefix(), "- Session Started")
+	sessionManager.DeregisterOnTimeout(session.Id, func() { log.Info(session.LogPrefix(), "- Session Finished") })
 
-	return client, nil
+	return session, nil
 }
 
 func logRecord(clientId string, record *adt.Record) {
 	if log.IsInfoEnabled() {
-		log.Info(getClientLog(clientId, record.ToString(config.LogRemoteAddr, 26)))
+		log.Info(getSessionLog(clientId, record.ToString(config.LogRemoteAddr, 26)))
 	}
 }
 
-func getClientLog(clientId string, message string) string {
+func getSessionLog(clientId string, message string) string {
 	return clientId + " - " + message
 }
 
