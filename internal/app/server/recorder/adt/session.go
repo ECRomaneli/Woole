@@ -44,9 +44,10 @@ func (session *Session) LogPrefix() string {
 	return logPrefix
 }
 
-func (session *Session) AddRecord(rec *Record) (id string) {
-	rec.Id = session.seq.NextString()
+func (session *Session) AddRecordAndPublish(rec *Record, prefix string) (id string) {
+	rec.Id = prefix + session.seq.NextString()
 	session.putRecord(rec.Id, rec)
+	println(rec.Id)
 	session.RecordChannel <- &rec.Record
 	return rec.Id
 }

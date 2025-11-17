@@ -38,12 +38,13 @@ type Config struct {
 	TunnelConnectionTimeout time.Duration
 	sharedKey               []byte
 	seed                    []byte
+	IdPrefix                string
 	available               bool
 	Version                 string
 }
 
 var (
-	config   *Config = &Config{available: false, Version: "{{VERSION}}"}
+	config   *Config = &Config{available: false, IdPrefix: getCurrentTimestamp() + ":", Version: "{{VERSION}}"}
 	configMu sync.Mutex
 )
 
@@ -124,6 +125,7 @@ func ReadConfig() *Config {
 		TunnelResponseTimeout:   parseDurationOrPanic("tunnel-response-timeout", *tunnelResponseTimeout),
 		TunnelReconnectTimeout:  parseDurationOrPanic("tunnel-reconnect-timeout", *tunnelReconnectTimeout),
 		TunnelConnectionTimeout: parseDurationOrPanic("tunnel-connection-timeout", *tunnelConnectionTimeout),
+		IdPrefix:                config.IdPrefix,
 		Version:                 config.Version,
 		available:               true,
 	}
@@ -210,6 +212,11 @@ func AuthClient(sharedKey []byte) error {
 	}
 
 	return nil
+}
+
+func getCurrentTimestamp() string {
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	return timestamp
 }
 
 func parseDurationOrPanic(field string, duration string) time.Duration {
