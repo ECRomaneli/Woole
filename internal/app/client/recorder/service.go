@@ -102,7 +102,7 @@ func handleServerRecord(stream tunnel.Tunnel_TunnelClient, serverRecord *tunnel.
 	switch serverRecord.Step {
 	case tunnel.Step_REQUEST:
 		handleServerRequest(stream, serverRecord)
-	case tunnel.Step_SERVER_ELAPSED:
+	case tunnel.Step_POST_RESPONSE:
 		handleServerElapsed(serverRecord)
 	default:
 		log.Error("Record Step Not Allowed")
@@ -133,7 +133,7 @@ func handleServerElapsed(serverRecord *tunnel.Record) {
 		return
 	}
 
-	rec.Step = tunnel.Step_SERVER_ELAPSED
+	rec.Step = tunnel.Step_POST_RESPONSE
 	rec.Response.ServerElapsed = serverRecord.Response.ServerElapsed
 	records.Publish(&adt.Record{ClientId: rec.ClientId, Record: serverRecord})
 }

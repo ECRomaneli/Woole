@@ -58,7 +58,7 @@ func (session *Session) RemoveRecord(recordId string) *Record {
 }
 
 func (session *Session) SendServerElapsed(rec *Record) {
-	session.RecordChannel <- rec.ThinClone(tunnel.Step_SERVER_ELAPSED)
+	session.RecordChannel <- rec.ThinClone(tunnel.Step_POST_RESPONSE)
 }
 
 func (session *Session) SetRecordResponse(recordId string, response *tunnel.Response) {

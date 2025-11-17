@@ -50,7 +50,7 @@ func connHandler(req *webserver.Request, res *webserver.Response) {
 			rec := msg.(*recorderAdt.Record)
 
 			var event *webserver.Event
-			if rec.Step == tunnel.Step_SERVER_ELAPSED {
+			if rec.Step == tunnel.Step_POST_RESPONSE {
 				event = &webserver.Event{Name: "update-record", Data: rec}
 			} else {
 				event = &webserver.Event{Name: "new-record", Data: rec.ThinCloneWithoutResponseBody()}
