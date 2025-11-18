@@ -24,10 +24,10 @@ jobs:
             osName: windows
             arch: x64
             extension: .exe
-          - os: macos-14
+          - os: macos-latest
             osName: darwin
             arch: arm64
-          - os: macos-13
+          - os: macos-15-intel
             osName: darwin
             arch: x64
     runs-on: ${{ matrix.os }}
