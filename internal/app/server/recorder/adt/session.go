@@ -44,9 +44,10 @@ func (session *Session) LogPrefix() string {
 	return logPrefix
 }
 
-func (session *Session) AddRecord(rec *Record) (id string) {
-	rec.Id = session.seq.NextString()
+func (session *Session) AddRecordAndPublish(rec *Record, prefix string) (id string) {
+	rec.Id = prefix + session.seq.NextString()
 	session.putRecord(rec.Id, rec)
+	println(rec.Id)
 	session.RecordChannel <- &rec.Record
 	return rec.Id
 }
@@ -58,7 +59,7 @@ func (session *Session) RemoveRecord(recordId string) *Record {
 }
 
 func (session *Session) SendServerElapsed(rec *Record) {
-	session.RecordChannel <- rec.ThinClone(tunnel.Step_SERVER_ELAPSED)
+	session.RecordChannel <- rec.ThinClone(tunnel.Step_POST_RESPONSE)
 }
 
 func (session *Session) SetRecordResponse(recordId string, response *tunnel.Response) {
@@ -106,4 +107,10 @@ func (session *Session) SetExpireAt(expireAt time.Duration) {
 	session.Lock()
 	defer session.Unlock()
 	session.ExpireAt = time.Now().Add(expireAt)
+}
+
+func (session *Session) SetExpireAtTime(expireAt int64) {
+	session.Lock()
+	defer session.Unlock()
+	session.ExpireAt = time.Unix(expireAt, 0)
 }

@@ -31,15 +31,16 @@ func decompress(contentEncoding string, data []byte) []byte {
 		return data
 	}
 
-	if contentEncoding == "gzip" {
+	switch contentEncoding {
+	case "gzip":
 		reader, err := gzip.NewReader(bytes.NewReader(data))
 		panicIfNotNil(err)
 		return readReadCloser(reader)
-	} else if contentEncoding == "br" {
+	case "br":
 		return readBrotli(brotli.NewReader(bytes.NewReader(data)))
-	} else if contentEncoding == "deflate" {
+	case "deflate":
 		return readReadCloser(flate.NewReader(bytes.NewReader(data)))
-	} else if contentEncoding == "zstd" {
+	case "zstd":
 		decoder, err := zstd.NewReader(bytes.NewReader(data))
 		panicIfNotNil(err)
 		return readZstd(decoder)

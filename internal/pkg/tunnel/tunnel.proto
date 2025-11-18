@@ -25,6 +25,8 @@ message Handshake {
     bool allowReaders = 3;
     bytes bearer = 4;
     bytes sharedKey = 5;
+    int64 expireAt = 6;
+    string version = 7;
 }
 
 message Session {
@@ -72,7 +74,7 @@ message Empty {}
 enum Step {
     REQUEST = 0;
     RESPONSE = 1;
-    SERVER_ELAPSED = 2;
+    POST_RESPONSE = 2;
 }
 
 enum Status {

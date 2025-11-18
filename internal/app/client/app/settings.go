@@ -205,6 +205,8 @@ func (cfg *Config) GetHandshake() *tunnel.Handshake {
 		ClientKey: cfg.ClientKey,
 		Bearer:    session.Bearer,
 		SharedKey: sharedKey,
+		ExpireAt:  session.ExpireAt,
+		Version:   cfg.Version,
 	}
 }
 

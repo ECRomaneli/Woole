@@ -197,7 +197,7 @@ For more details, consult the step-by-step instructions [here](docs/docker.md).
 
 #### Requirements:
 
-- Golang 1.24;
+- Golang 1.25;
 - protoc (only for protobuf changes);
 
 #### Steps:

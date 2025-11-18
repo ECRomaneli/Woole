@@ -24,7 +24,7 @@ import (
 func getRecordWhenReady(session *adt.Session, req *webserver.Request) (*adt.Record, error) {
 	record := adt.NewRecord((&tunnel.Request{}).FromHTTPRequest(req))
 	record.Step = tunnel.Step_REQUEST
-	session.AddRecord(record)
+	session.AddRecordAndPublish(record, config.IdPrefix)
 
 	var err error
 

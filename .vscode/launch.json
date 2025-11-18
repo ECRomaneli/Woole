@@ -59,6 +59,18 @@
             ]
         },
         {
+            "name": "10m Conn Server",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/server",
+            "args": [
+                "-seed", "<any-seed>",
+                "-http", "8080",
+                "-tunnel-connection-timeout", "10m",
+            ]
+        },
+        {
             "name": "Server w/ Domain",
             "type": "go",
             "request": "launch",

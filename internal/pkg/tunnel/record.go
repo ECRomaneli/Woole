@@ -9,7 +9,7 @@ func (rec *Record) ThinClone(step Step) *Record {
 		thinClone.Response = rec.Response
 	case Step_REQUEST:
 		thinClone.Request = rec.Request
-	case Step_SERVER_ELAPSED:
+	case Step_POST_RESPONSE:
 		thinClone.Response = &Response{ServerElapsed: rec.Response.ServerElapsed}
 	}
 

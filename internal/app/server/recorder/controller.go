@@ -3,10 +3,13 @@ package recorder
 import (
 	"context"
 	"net/http"
+	"time"
 	"woole/internal/pkg/tunnel"
 
 	"github.com/ecromaneli-golang/http/webserver"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/status"
 )
 
 // REST -> [ALL] /**
@@ -51,6 +54,11 @@ func (_t *Tunnel) Tunnel(stream tunnel.Tunnel_TunnelServer) error {
 		return err
 	}
 
+	if hs.Handshake.Version != config.Version {
+		log.Warn("incompatible client version " + hs.Handshake.Version)
+		return status.Errorf(codes.FailedPrecondition, "incompatible client version %s, expected %s", hs.Handshake.Version, config.Version)
+	}
+
 	// Recover session if exists
 	session, err := createOrRetrieveSession(hs.Handshake, getContextIp(ctx))
 	if err != nil {
@@ -62,6 +70,15 @@ func (_t *Tunnel) Tunnel(stream tunnel.Tunnel_TunnelServer) error {
 
 	if config.TunnelConnectionTimeout != 0 {
 		session.SetExpireAt(config.TunnelConnectionTimeout)
+	}
+
+	if hs.Handshake.ExpireAt != 0 {
+		if config.TunnelConnectionTimeout == 0 || session.ExpireAt.Unix() > hs.Handshake.ExpireAt {
+			session.SetExpireAtTime(hs.Handshake.ExpireAt)
+		}
+	}
+
+	if !session.ExpireAt.IsZero() {
 		cancelableCtx, cancel := context.WithDeadline(stream.Context(), session.ExpireAt)
 		ctx = cancelableCtx
 		defer cancel()
@@ -97,6 +114,13 @@ func (_t *Tunnel) Tunnel(stream tunnel.Tunnel_TunnelServer) error {
 // RPC -> TestConn()
 func (_t *Tunnel) TestConn(_ context.Context, _ *tunnel.Empty) (*tunnel.Empty, error) {
 	return new(tunnel.Empty), nil
+}
+
+func getExpireDate(clientExpireAt int64) time.Duration {
+	if clientExpireAt != -1 {
+		return time.Duration(clientExpireAt)
+	}
+	return config.TunnelConnectionTimeout
 }
 
 func hasClient(clientId string) bool {

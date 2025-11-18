@@ -178,7 +178,11 @@ func isRetriable(err error, aborted bool) bool {
 		if status.Code(err) == codes.DeadlineExceeded {
 			log.Info("["+config.TunnelUrl.String()+"]", "Session expired")
 		} else {
-			log.Fatal("["+config.TunnelUrl.String()+"] Tunnel error:", errStatus.Code())
+			errMessage := errStatus.Code().String()
+			if status.Code(err) == codes.FailedPrecondition {
+				errMessage += " - " + errStatus.Message()
+			}
+			log.Fatal("["+config.TunnelUrl.String()+"] Tunnel error:", errMessage)
 			log.Fatal("["+config.TunnelUrl.String()+"]", "Failed to connect with tunnel")
 		}
 		return false
