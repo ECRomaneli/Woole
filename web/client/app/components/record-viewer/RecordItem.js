@@ -47,7 +47,7 @@ app.component('RecordItem', {
             </div>
 
             <div class="tab-pane pt-3 h-100" :class="{ active: tab === 'body' }">
-                <code-editor ref="codeEditor" :type="content.type" :code="item.body" read-only></code-editor>
+                <code-editor ref="codeEditor" class="record-body" :type="content.type" :code="item.body" read-only></code-editor>
             </div>
 
             <div class="tab-pane pt-3 h-100" :class="{ active: tab === 'preview' }">
