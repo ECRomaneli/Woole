@@ -108,3 +108,9 @@ func (session *Session) SetExpireAt(expireAt time.Duration) {
 	defer session.Unlock()
 	session.ExpireAt = time.Now().Add(expireAt)
 }
+
+func (session *Session) SetExpireAtTime(expireAt int64) {
+	session.Lock()
+	defer session.Unlock()
+	session.ExpireAt = time.Unix(expireAt, 0)
+}
