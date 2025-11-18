@@ -47,7 +47,6 @@ func (session *Session) LogPrefix() string {
 func (session *Session) AddRecordAndPublish(rec *Record, prefix string) (id string) {
 	rec.Id = prefix + session.seq.NextString()
 	session.putRecord(rec.Id, rec)
-	println(rec.Id)
 	session.RecordChannel <- &rec.Record
 	return rec.Id
 }

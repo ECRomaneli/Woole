@@ -1,6 +1,6 @@
 app.component('Modal', {
     template: /*html*/ `
-    <div ref="modal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" style="display: none;">
+    <div ref="modal" class="modal fade" data-bs-backdrop="static" :data-bs-keyboard="escButton" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" style="display: none;">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content" :class="{ 'h-100': fitHeight }">
                 <div class="modal-header">
@@ -21,7 +21,7 @@ app.component('Modal', {
     </div>
     `,
     emits: [ 'show', 'hide' ],
-    props: { fitHeight: { type: Boolean, default: false } },
+    props: { fitHeight: { type: Boolean, default: false }, escButton: { type: Boolean, default: false } },
     data() { return { emitDelay: 100 } },
     mounted() { this.modal = new bootstrap.Modal(this.$refs.modal) },
     unmounted() {

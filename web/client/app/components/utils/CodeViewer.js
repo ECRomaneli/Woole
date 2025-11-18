@@ -1,6 +1,6 @@
 app.component('CodeViewer', {
     template: /*html*/ `
-    <modal ref="modal" fit-height>
+    <modal ref="modal" fit-height esc-button>
         <template #title>
             <img class="svg-icon square-24 me-2" :src="$image.src('request')" alt="request">
             <span class="h5 p-0">Code Viewer</span>
