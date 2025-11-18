@@ -39,9 +39,9 @@
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1020px;
             width: 90%;
-            margin: 0 auto;
+            margin: auto 20px auto;
         }
         
         .logo {
@@ -168,7 +168,7 @@
         <div class="code-wrapper">
             <div class="code-block">
                 <pre id="docker-command"><span class="comment"># Using Docker</span>
-<span class="command">docker</span> <span class="flag">run</span> <span class="flag">--rm</span> <span class="flag">-p</span> <span class="string">8000:8000</span> <span class="command">woole</span><span class="string dynamic-tunnel"></span><span class="dynamic-client"></span> <span class="flag">-proxy</span> <span class="string">{url_to_proxy}</span></pre>
+<span class="command">docker</span> <span class="flag">run</span> <span class="flag">--rm</span> <span class="flag">-p</span> <span class="string">8000:8000</span> <span class="flag"><b>ecromaneli/woole</b></span><span class="string dynamic-tunnel"></span><span class="dynamic-client"></span> <span class="flag">-proxy</span> <span class="string">{url_to_proxy}</span></pre>
             </div>
             <button class="copy-button" data-command="docker" title="Copy to clipboard"></button>
         </div>
@@ -209,8 +209,8 @@
             
             // Command templates
             const commands = {
-                client: `woole${tunnelOption}${clientOption} -proxy {url_to_proxy}`,
-                docker: `docker run --rm -p 8000:8000 woole${tunnelOption}${clientOption} -proxy {url_to_proxy}`,
+                client: document.getElementById('client-command').innerText.split('\n')[1],
+                docker: document.getElementById('docker-command').innerText.split('\n')[1]
             };
             
             // SVG templates
