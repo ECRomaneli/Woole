@@ -428,7 +428,7 @@
 }
 
 @media (max-width: 1460px) {
-    #body .editor-container {
+    #body .record-body {
         height: 640px !important;
     }
 }
