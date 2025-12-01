@@ -22,7 +22,7 @@
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
-## Documentations
+## Documentation
 
 
 | [Client](docs/client.md) | [Server](docs/server.md) | [Docker](docs/docker.md) | [Sniffer](docs/sniffer.md) | [Special Types](docs/special-types.md) |
@@ -35,7 +35,7 @@ Woole consists of two primary modules: the Woole Client and the Woole Server. Th
 
 <p align='center'>
     <a href="https://github.com/ECRomaneli/woole" style='text-decoration:none'>
-        <img src="https://i.postimg.cc/xT2bh1jC/woole-arch.png" alt='woole architecture'>
+        <img src="https://i.postimg.cc/Y0J3HGqQ/woole-diagram2.png" alt='woole diagram'>
     </a>
 </p>
 
