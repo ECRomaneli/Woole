@@ -1,23 +1,21 @@
 app.component('ResponseTimeChart', {
     template: /*html*/ `
-        <box maximizable="false" label="Response Time">
-            <template #body>
-                <div class="stats-chart d-flex align-items-center justify-content-center">
-                    <canvas v-show="records.length" ref="canvas"></canvas>
-                    <span v-if="!records.length" class="h4">NO DATA</span>
-                </div>
-            </template>
-        </box>
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">Response Time</span>
+                <span class="chart-subtitle">Distribution by bucket</span>
+            </div>
+            <div class="chart-body">
+                <canvas v-show="records.length" ref="canvas"></canvas>
+                <span v-if="!records.length" class="no-data">No data yet</span>
+            </div>
+        </div>
     `,
     inject: ['$chart'],
     props: { records: Array },
     data() { return { chart: null, labelToRange: {
-        '0-100ms': '0-100ms',
-        '101-500ms': '101-500ms',
-        '501-1000ms': '501-1000ms',
-        '1-2s': '1000-2000ms',
-        '2-5s': '2000-5000ms',
-        '5s+': '5000ms-'
+        '0-100ms':'0-100ms','101-500ms':'101-500ms','501ms-1s':'501-1000ms',
+        '1-2s':'1000-2000ms','2-5s':'2000-5000ms','5s+':'5000ms-'
     } } },
     mounted() { this.createChart() },
     beforeUnmount() { this.chart && this.chart.destroy() },
@@ -25,53 +23,30 @@ app.component('ResponseTimeChart', {
     methods: {
         createChart() {
             const data = this.getData()
-            const backgroundColor = [
-                'rgba(83, 180, 119, 0.7)',
-                'rgba(105, 192, 150, 0.7)',
-                'rgba(255, 206, 86, 0.7)',
-                'rgba(255, 159, 64, 0.7)',
-                'rgba(255, 129, 102, 0.7)',
-                'rgba(255, 99, 132, 0.7)'
-            ]
-
             this.chart = this.$chart.create(
-                this.$refs.canvas,
-                'bar',
-                Object.keys(data),
-                Object.values(data),
-                backgroundColor,
-                { indexAxis: 'y', scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } },
-                label => this.$bus.trigger('sidebar.search', `response.elapsed~: ${this.labelToRange[label]}`)
+                this.$refs.canvas, 'bar', Object.keys(data), Object.values(data),
+                ['rgba(63,185,80,.7)','rgba(105,192,150,.7)','rgba(210,153,34,.7)','rgba(255,159,64,.7)','rgba(248,129,102,.7)','rgba(248,81,73,.7)'],
+                { indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } },
+                label => this.$bus.trigger('sidebar.search', 'response.elapsed~: ' + this.labelToRange[label])
             )
         },
-
         updateChart() {
             const data = this.getData()
             this.chart.data.labels = Object.keys(data)
             this.chart.data.datasets[0].data = Object.values(data)
             this.chart.update()
         },
-
         getData() {
-            const data = {
-                '0-100ms': 0,
-                '101-500ms': 0,
-                '501-1000ms': 0,
-                '1-2s': 0,
-                '2-5s': 0,
-                '5s+': 0
-            }
-
-            this.records.forEach(record => {
-                const time = record.response.elapsed || 0
-                if (time <= 100) data['0-100ms']++
-                else if (time <= 500) data['101-500ms']++
-                else if (time <= 1000) data['501-1000ms']++
-                else if (time <= 2000) data['1-2s']++
-                else if (time <= 5000) data['2-5s']++
+            const data = { '0-100ms':0,'101-500ms':0,'501ms-1s':0,'1-2s':0,'2-5s':0,'5s+':0 }
+            this.records.forEach(r => {
+                const t = r.response.elapsed || 0
+                if (t <= 100) data['0-100ms']++
+                else if (t <= 500) data['101-500ms']++
+                else if (t <= 1000) data['501ms-1s']++
+                else if (t <= 2000) data['1-2s']++
+                else if (t <= 5000) data['2-5s']++
                 else data['5s+']++
             })
-
             return data
         }
     }

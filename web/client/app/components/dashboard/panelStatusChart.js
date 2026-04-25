@@ -1,13 +1,15 @@
 app.component('StatusChart', {
     template: /*html*/ `
-        <box maximizable="false" label="Status Codes">
-            <template #body>
-                <div class="stats-chart d-flex align-items-center justify-content-center">
-                    <canvas v-show="records.length" ref="canvas"></canvas>
-                    <span v-if="!records.length" class="h4">NO DATA</span>
-                </div>
-            </template>
-        </box>
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">Status Codes</span>
+                <span class="chart-subtitle">By response class</span>
+            </div>
+            <div class="chart-body">
+                <canvas v-show="records.length" ref="canvas"></canvas>
+                <span v-if="!records.length" class="no-data">No data yet</span>
+            </div>
+        </div>
     `,
     inject: ['$chart'],
     props: { records: Array },
@@ -18,56 +20,33 @@ app.component('StatusChart', {
     methods: {
         createChart() {
             const data = this.getData()
-            const labels = Object.keys(data)
-            const backgroundColor = [
-                'rgba(200, 200, 200, 0.7)', // 1xx
-                'rgba(83, 180, 119, 0.7)',  // 2xx
-                'rgba(210, 145, 25, 0.7)',  // 3xx
-                'rgba(255, 86, 86, 0.7)',   // 4xx
-                'rgba(255, 99, 177, 0.7)',  // 5xx
-                'rgba(32, 32, 32, 0.7)'     // Unknown
-            ]
-
             this.chart = this.$chart.create(
-                this.$refs.canvas,
-                'bar',
-                labels,
-                Object.values(data),
-                backgroundColor,
+                this.$refs.canvas, 'bar', Object.keys(data), Object.values(data),
+                ['rgba(121,192,255,.7)', 'rgba(63,185,80,.7)', 'rgba(210,153,34,.7)', 'rgba(248,81,73,.7)', 'rgba(255,123,114,.7)'],
                 {
                     plugins: {
+                        legend: { display: false },
                         tooltip: { callbacks: { footer: (items) => {
-                            const labels = {
-                                '1xx': 'Informational',
-                                '2xx': 'Success',
-                                '3xx': 'Redirection',
-                                '4xx': 'Client Error',
-                                '5xx': 'Server Error',
-                                '9xx': 'Unknown'
-                            }
+                            const labels = { '1xx':'Informational','2xx':'Success','3xx':'Redirection','4xx':'Client Error','5xx':'Server Error' }
                             return labels[items[0].label] || ''
-                        } } },
-                        legend: { display: false }
-                    }
+                        }}}
+                    },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
                 },
-                label => this.$bus.trigger('sidebar.search', `response.codeGroup: ${label}`)
+                label => this.$bus.trigger('sidebar.search', 'response.codeGroup: ' + label)
             )
         },
-
         updateChart() {
             const data = this.getData()
             this.chart.data.labels = Object.keys(data)
             this.chart.data.datasets[0].data = Object.values(data)
             this.chart.update()
         },
-
         getData() {
             const data = { '1xx': 0, '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0 }
-            this.records.forEach(record => {
-                const group = `${Math.floor(record.response.code / 100)}xx`
-                if (data[group] !== undefined) {
-                    data[group]++
-                }
+            this.records.forEach(r => {
+                const g = Math.floor(r.response.code / 100) + 'xx'
+                if (data[g] !== undefined) data[g]++
             })
             return data
         }

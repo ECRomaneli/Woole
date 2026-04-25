@@ -1,13 +1,15 @@
 app.component('MethodsChart', {
     template: /*html*/ `
-        <box maximizable="false" label="HTTP Methods">
-            <template #body>
-                <div class="stats-chart d-flex align-items-center justify-content-center">
-                    <canvas v-show="records.length" ref="canvas"></canvas>
-                    <span v-if="!records.length" class="h4">NO DATA</span>
-                </div>
-            </template>
-        </box>
+        <div class="chart-card">
+            <div class="chart-header">
+                <span class="chart-title">HTTP Methods</span>
+                <span class="chart-subtitle">Request distribution</span>
+            </div>
+            <div class="chart-body">
+                <canvas v-show="records.length" ref="canvas"></canvas>
+                <span v-if="!records.length" class="no-data">No data yet</span>
+            </div>
+        </div>
     `,
     inject: ['$chart'],
     props: { records: Array },
@@ -18,54 +20,31 @@ app.component('MethodsChart', {
     methods: {
         createChart() {
             const data = this.getData()
-            const labels = Object.keys(data)
-            const backgroundColor = this.getBackgroundColor(labels)
-
             this.chart = this.$chart.create(
-                this.$refs.canvas,
-                'doughnut',
-                labels,
-                Object.values(data),
-                backgroundColor,
-                null,
-                label => this.$bus.trigger('sidebar.search', `request.method: ${label}`)
+                this.$refs.canvas, 'doughnut', Object.keys(data), Object.values(data),
+                this.getColors(Object.keys(data)),
+                { plugins: { legend: { position: 'right' } }, cutout: '55%' },
+                label => this.$bus.trigger('sidebar.search', 'request.method: ' + label)
             )
         },
-
         updateChart() {
             const data = this.getData()
-
             this.chart.data.labels = Object.keys(data)
             this.chart.data.datasets[0].data = Object.values(data)
-            this.chart.data.datasets[0].backgroundColor = this.getBackgroundColor(Object.keys(data))
-
+            this.chart.data.datasets[0].backgroundColor = this.getColors(Object.keys(data))
             this.chart.update()
         },
-
-        getBackgroundColor(labels) {
-            const methodColors = {
-                'GET': 'rgba(83, 180, 119, 0.7)',
-                'POST': 'rgba(25, 118, 210, 0.7)',
-                'PUT': 'rgba(255, 206, 86, 0.7)',
-                'DELETE': 'rgba(255, 99, 132, 0.7)',
-                'PATCH': 'rgba(153, 102, 255, 0.7)',
-                'HEAD': 'rgba(255, 159, 64, 0.7)',
-                'OPTIONS': 'rgba(199, 199, 199, 0.7)'
+        getColors(labels) {
+            const c = {
+                'GET':'rgba(63,185,80,.75)','POST':'rgba(83,141,247,.75)','PUT':'rgba(210,153,34,.75)',
+                'DELETE':'rgba(248,81,73,.75)','PATCH':'rgba(163,113,247,.75)','HEAD':'rgba(121,192,255,.75)',
+                'OPTIONS':'rgba(139,148,158,.75)'
             }
-
-            return labels.map(method =>
-                methodColors[method] || `rgba(${Math.floor(Math.random() * 200)}, ${Math.floor(Math.random() * 200)}, ${Math.floor(Math.random() * 200)}, 0.7)`
-            )
+            return labels.map(m => c[m] || 'rgba(139,148,158,.5)')
         },
-
         getData() {
             const data = {}
-
-            this.records.forEach(record => {
-                const method = record.request.method
-                data[method] = (data[method] || 0) + 1
-            })
-
+            this.records.forEach(r => { data[r.request.method] = (data[r.request.method] || 0) + 1 })
             return data
         }
     }

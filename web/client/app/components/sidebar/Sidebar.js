@@ -1,22 +1,31 @@
 app.component('Sidebar', {
     template: /*html*/ `
-        <nav id="sidebar" class="d-flex flex-column m-2">
-            <div class="d-flex mb-2">
-                <div class="d-flex me-2 sidebar-btn w-100" :class="{ active: !selectedRecord }" @click="showRecord()">
-                    <img class="svg-icon square-20" :src="$image.src('view-grid')" alt="settings" title="Settings">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <img class="logo svg-icon" :src="$image.src('favicon')" alt="Woole">
+                    <h1>Woole</h1>
+                    <span class="version">Traffic Inspector</span>
                 </div>
-                <div class="d-flex me-2 sidebar-btn w-100" @click="toggleTheme()">
-                    <img class="svg-icon square-20" :src="$image.src(themeImg)" alt="theme" title="Theme">
+
+                <div class="sidebar-toolbar">
+                    <div class="tool-btn" :class="{ active: !selectedRecord }" @click="showRecord()" title="Dashboard">
+                        <img class="svg-icon" :src="$image.src('view-grid')" alt="dashboard">
+                    </div>
+                    <div class="tool-btn" @click="toggleTheme()" title="Toggle Theme">
+                        <img class="svg-icon" :src="$image.src(themeImg)" alt="theme">
+                    </div>
+                    <div class="tool-btn" @click="clearRecords()" title="Clear All">
+                        <img class="svg-icon" :src="$image.src('trash2')" alt="clear">
+                    </div>
+                    <div class="tool-btn" @click="$refs.reqEditor.show()" title="New Request">
+                        <img class="svg-icon" :src="$image.src('file-signature')" alt="new request">
+                    </div>
                 </div>
-                <div class="d-flex me-2 sidebar-btn w-100" @click="clearRecords()">
-                    <img class="svg-icon square-20" :src="$image.src('trash2')" alt="clear all" title="Clear All">
+
+                <div class="sidebar-search">
+                    <input v-model="inputSearch" :class="{ active: inputSearch !== '' }" placeholder="Filter records..." type="search" spellcheck="false">
                 </div>
-                <div class="d-flex sidebar-btn w-100" @click="$refs.reqEditor.show()">
-                    <img class="svg-icon square-20" :src="$image.src('file-signature')" alt="new request" title="New Request">
-                </div>
-            </div>
-            <div class="d-flex mb-2">
-                <input class="d-flex px-3 w-100 input-search" v-model="inputSearch" :class="{ active: inputSearch !== '' }" placeholder="Filter records" type="search" spellcheck="false">
             </div>
             
             <div id="record-list" :class="{ loading: recordList.length === 0 }">
@@ -30,10 +39,8 @@ app.component('Sidebar', {
                             @click="showRecord(record)"
                         ></sidebar-item>
 
-                        <div v-if="isOtherHost(record, filteredRecordList[index + 1])" class="d-flex p-1 mb-2 origin">
-                            <div class="smallest font-monospace text-center">
-                                <span>{{ record.request.forwardedTo }}</span>
-                            </div>
+                        <div v-if="isOtherHost(record, filteredRecordList[index + 1])" class="origin-separator">
+                            <span>{{ record.request.forwardedTo }}</span>
                         </div>
 
                     </template>
@@ -65,7 +72,6 @@ app.component('Sidebar', {
             this.recordList.sort((a, b) => b.clientId - a.clientId)
             range.end = this.recordList.length
             if (this.maxRecords && this.recordList.length > this.maxRecords) {
-                // Remove records that are not in the range
                 this.recordList.length = this.maxRecords
                 this.filterRecords(this.recordList)
                 return

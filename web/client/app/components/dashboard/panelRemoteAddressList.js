@@ -1,107 +1,68 @@
 app.component('RemoteAddressList', {
     template: /*html*/ `
-        <box maximizable="false" label="Remote Address Details">
-            <template #body>
-                <div class="stats-table remote-address-table">
-                    <table class="table table-sm table-striped table-hover m-0">
-                        <thead>
-                            <tr>
-                                <th>Address</th>
-                                <th class="w-100">Paths</th>
-                                <th>Records</th>
-                                <th>Size</th>
-                                <th>Avg Time</th>
-                                <th>Avg Server Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(data, ip) in data" :key="ip"  @click="searchIp(ip)">
-                                <td>{{ ip }}</td>
-                                <td class="paths-column">{{ data.paths }}</td>
-                                <td>{{ data.count }}</td>
-                                <td>{{ data.totalSize }}</td>
-                                <td>{{ data.avgResponseTime }}ms</td>
-                                <td>{{ data.avgServerTime }}ms</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
-        </box>
+        <div class="table-card">
+            <div class="table-header">Remote Address Details</div>
+            <div class="stats-table-inner">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Address</th>
+                            <th>Paths</th>
+                            <th>Reqs</th>
+                            <th>Size</th>
+                            <th>Avg Time</th>
+                            <th>Avg Server</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(d, ip) in data" :key="ip" @click="searchIp(ip)">
+                            <td class="mono">{{ ip }}</td>
+                            <td class="wrap">{{ d.paths }}</td>
+                            <td>{{ d.count }}</td>
+                            <td>{{ d.totalSize }}</td>
+                            <td>{{ d.avgResponseTime }}ms</td>
+                            <td>{{ d.avgServerTime }}ms</td>
+                        </tr>
+                        <tr v-if="!Object.keys(data).length"><td colspan="6" style="text-align:center;padding:20px;color:var(--text-tertiary)">No data yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     `,
     inject: ['$woole'],
     props: { records: Array },
-    data() {
-        return {
-            data: {}
-        }
-    },
-    mounted() {
-        this.updateData()
-    },
-    watch: {
-        records: {
-            handler() {
-                this.updateData()
-            },
-            deep: true
-        }
-    },
+    data() { return { data: {} } },
+    mounted() { this.updateData() },
+    watch: { records: { handler() { this.updateData() }, deep: true } },
     methods: {
-        updateData() {
-            this.data = this.getData()
-        },
-
+        updateData() { this.data = this.getData() },
         searchIp(ip) {
-            this.$bus.trigger('sidebar.search', `remoteAddr*: "^\\[?${this.$woole.escapeRegex(ip)}(]|:|$)"`)
+            this.$bus.trigger('sidebar.search', 'remoteAddr*: "^\\\\[?' + this.$woole.escapeRegex(ip) + '(]|:|$)"')
         },
-        
         getData() {
             const ipData = {}
-
-            this.records.forEach(record => {
-                if (!record.request.remoteAddr || !record.request.path) return
-
-                const ip = this.$woole.parseAddress(record.request.remoteAddr)?.ip
-                const path = record.request.path
-                const responseTime = record.response.elapsed || 0
-                const serverTime = record.response.serverElapsed || 0
-                const contentLength = parseInt(record.response.getHeader('Content-Length', 0), 10)
-
-                data = ipData[ip]
-
-                if (!data) {
-                    data = {
-                        paths: [],
-                        totalResponseTime: 0,
-                        totalServerTime: 0,
-                        totalSize: 0,
-                        count: 0
-                    }
-                    ipData[ip] = data
-                }
-
-                if (data.paths.length < 10 && !data.paths.includes(path)) {
-                    data.paths.push(path)
-                }
-
-                data.totalResponseTime += responseTime
-                data.totalServerTime += serverTime
-                data.totalSize += contentLength
-                data.count += 1
+            this.records.forEach(r => {
+                if (!r.request.remoteAddr || !r.request.path) return
+                const ip = this.$woole.parseAddress(r.request.remoteAddr)?.ip
+                const path = r.request.path
+                let d = ipData[ip]
+                if (!d) { d = { paths: [], totalResponseTime: 0, totalServerTime: 0, totalSize: 0, count: 0 }; ipData[ip] = d }
+                if (d.paths.length < 10 && !d.paths.includes(path)) d.paths.push(path)
+                d.totalResponseTime += r.response.elapsed || 0
+                d.totalServerTime += r.response.serverElapsed || 0
+                d.totalSize += parseInt(r.response.getHeader('Content-Length', 0), 10)
+                d.count++
             })
-
             const result = {}
-            Object.entries(ipData).forEach(([ip, data]) => {
+            Object.entries(ipData).forEach(([ip, d]) => {
                 result[ip] = {
-                    paths: data.paths.join(', ').slice(0, 360),
-                    count: data.count,
-                    totalSize: this.$woole.parseSize(data.totalSize),
-                    avgResponseTime: Math.round(data.totalResponseTime / data.count),
-                    avgServerTime: Math.round(data.totalServerTime / data.count)
+                    paths: d.paths.join(', ').slice(0, 360),
+                    count: d.count,
+                    totalSize: this.$woole.parseSize(d.totalSize),
+                    avgResponseTime: Math.round(d.totalResponseTime / d.count),
+                    avgServerTime: Math.round(d.totalServerTime / d.count)
                 }
             })
-
             return result
         }
     }

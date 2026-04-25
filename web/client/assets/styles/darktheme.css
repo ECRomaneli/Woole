@@ -1,78 +1,47 @@
-#app[data-theme="dark"] {
-    color-scheme: dark;
-    --background-color: #111;
-    --color: #a9b1b9;
-    --divider-border-color: #21262d;
-    --scrollbar-background-color: #6b6b6b;
-    --scrollbar-track-color: #222;
-
-    --border-radius: .25rem;
-    --margin: .5rem;
-    --font-monospace: var(--bs-font-monospace);
-}
-
-#app[data-theme="dark"] #sidebar, 
-#app[data-theme="dark"] #body {
-    --background-color: #0d1117;
-    --background-w-alpha-color: #0d1117fa;
-    --border-color: #2d3239;
-    --active-background-color: #13233a;
-    --active-border-color: #224d88;
-}
-
-#app[data-theme="dark"] #sidebar {
-    --search-color: #858e98;
-    --hover-search-background-color: #ad884611;
-    --hover-search-border-color: #ad8846;
-}
-
-#app[data-theme="dark"] .inline-tabs {
-    --active-tab-border-color: #f78166;
-    --tab-color: #b2b9c0;
-}
-
-#app[data-theme="dark"] .highlighted-group {
-    --input-background-color: #0b1525;
-}
-
-#app[data-theme="dark"] .modal {
-    --modal-max-width: 1000px;
-}
-
-#app[data-theme="dark"] .table {
-    --border-color: #161b22;
-    --body-color: #8b949e;
-}
-
-#app[data-theme="dark"] .box {
-    --header-background-color: #12171e;
-}
-
-#app[data-theme="dark"] .badge {
-    --background-color: #8885;
-    --color: #fff;
-    --border-color: #222;
-
-    --green: #65be00;
-    --orange: #FFA000;
-    --blue: #1976D2;
-    --red: #E64A19;
-    --wine: #ab0f05;
-    --purple: #9C27B0;
-    --gray: #616161;
-    --dark-green: #689F38;
-    --dark-orange: #F57C00;
-    --dark-red: #F44336;
-    /* --wine: #D32F2F; */
-
-    --alt-green: #36650155;
-    --alt-orange: #FFA00055;
-    --alt-blue: #1976D255;
-    --alt-red: #E64A1955;
-    --alt-wine: #8b251d55;
-    --alt-purple: #751d8b55;
-    --alt-gray: #61616155;
-    --alt-dark-green: #689F3855;
-    --alt-dark-orange: #F57C0055;
-    --alt-dark-red: #F4433655;
+/* Woole — Dark Theme */
+[data-theme="dark"] {
+    --bg-primary: #0d1117;
+    --bg-sidebar: #0d1117;
+    --bg-card: #161b22;
+    --bg-card-header: #1c2129;
+    --bg-input: #0d1117;
+    --bg-hover: rgba(255,255,255,.04);
+    --bg-active: rgba(99,140,255,.08);
+    --bg-stripe: rgba(255,255,255,.02);
+    --bg-query-badge: rgba(255,255,255,.08);
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-tertiary: #555d66;
+    --border: #21262d;
+    --border-hover: #363b42;
+    --border-subtle: rgba(255,255,255,.04);
+    --accent: #538df7;
+    --accent-hover: #6ea0ff;
+    --accent-glow: rgba(83,141,247,.15);
+    --scrollbar: #2a2f36;
+    --scrollbar-hover: #3d434b;
+    --shadow-card: 0 2px 12px rgba(0,0,0,.3);
+    --shadow-modal: 0 16px 48px rgba(0,0,0,.5);
+    --icon-filter: invert(.75);
+    --method-get: #3fb950;
+    --method-post: #538df7;
+    --method-put: #d29922;
+    --method-delete: #f85149;
+    --method-patch: #a371f7;
+    --method-head: #79c0ff;
+    --method-options: #8b949e;
+    --status-1xx: #79c0ff;
+    --status-2xx: #3fb950;
+    --status-3xx: #d29922;
+    --status-4xx: #f85149;
+    --status-5xx: #ff7b72;
+    --status-connected-bg: rgba(63,185,80,.12);
+    --status-connected-text: #3fb950;
+    --status-connecting-bg: rgba(121,192,255,.12);
+    --status-connecting-text: #79c0ff;
+    --status-disconnected-bg: rgba(248,81,73,.12);
+    --status-disconnected-text: #f85149;
+    --status-reconnecting-bg: rgba(210,153,34,.12);
+    --status-reconnecting-text: #d29922;
+    --badge-redirect: #8957e5;
 }

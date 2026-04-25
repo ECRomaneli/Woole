@@ -1,88 +1,47 @@
-#app[data-theme="light"] {
-    color-scheme: light;
-    --background-color: #f6f8fa;
-    --color: #1F2328;
-    --divider-border-color: #d8dee4;
-    --scrollbar-background-color: #969696;
-    --scrollbar-track-color: #e8e8e8;
-
-    --border-radius: .25rem;
-    --margin: .5rem;
-    --font-monospace: var(--bs-font-monospace);
-}
-
-#app[data-theme="light"] #sidebar, 
-#app[data-theme="light"] #body {
-    --background-color: #fff;
-    --background-w-alpha-color: #fffffffa;
-    --border-color: #d0d7de;
-    --active-background-color: #e8ecef;
-    --active-border-color: #919191;
-}
-
-#app[data-theme="light"] #sidebar {
-    --search-color: #858e98;
-    --hover-search-background-color: #ad884611;
-    --hover-search-border-color: #ad8846;
-}
-
-#app[data-theme="light"] .inline-tabs {
-    --active-tab-border-color: #f78166;
-    --tab-color: var(--color);
-}
-
-#app[data-theme="light"] .highlighted-group {
-    --input-background-color: #fff;
-}
-
-#app[data-theme="light"] .modal {
-    --modal-max-width: 1000px;
-}
-
-#app[data-theme="light"] .table {
-    --border-color: #e5e5e5;
-    --body-color: #555;
-}
-
-#app[data-theme="light"] .box {
-    --header-background-color: #f7f7f7;
-}
-
-#app[data-theme="light"] .badge {
-    --background-color: #8885;
-    --color: #fff;
-    --border-color: #222;
-
-    --green: #65be00;
-    --orange: #FFA000;
-    --blue: #1976D2;
-    --red: #E64A19;
-    --wine: #ab0f05;
-    --purple: #9C27B0;
-    --gray: #616161;
-    --dark-green: #689F38;
-    --dark-orange: #F57C00;
-    --dark-red: #F44336;
-
-    --alt-green: var(--green);
-    --alt-orange: var(--orange);
-    --alt-blue: var(--blue);
-    --alt-red: var(--red);
-    --alt-wine: var(--wine);
-    --alt-purple: var(--purple);
-    --alt-gray: var(--gray);
-    --alt-dark-green: var(--dark-green);
-    --alt-dark-orange: var(--dark-orange);
-    --alt-dark-red: var(--dark-red);
-}
-
-#app[data-theme="light"] .box,
-#app[data-theme="light"] .sidebar-btn,
-#app[data-theme="light"] .input-search,
-#app[data-theme="light"] #record-list {
-    box-shadow: 0 3px 6px rgba(140,149,159,0.15);
-}
-
-#app[data-theme="light"] .svg-icon {
-    filter: brightness(.7);
+/* Woole — Light Theme */
+[data-theme="light"] {
+    --bg-primary: #f6f8fa;
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-header: #f6f8fa;
+    --bg-input: #f6f8fa;
+    --bg-hover: rgba(0,0,0,.03);
+    --bg-active: rgba(83,141,247,.06);
+    --bg-stripe: rgba(0,0,0,.015);
+    --bg-query-badge: rgba(0,0,0,.06);
+    --text-primary: #1f2328;
+    --text-secondary: #57606a;
+    --text-tertiary: #8b949e;
+    --border: #d0d7de;
+    --border-hover: #b0b8c1;
+    --border-subtle: rgba(0,0,0,.06);
+    --accent: #0969da;
+    --accent-hover: #0550ae;
+    --accent-glow: rgba(9,105,218,.12);
+    --scrollbar: #c8ccd0;
+    --scrollbar-hover: #a8adb2;
+    --shadow-card: 0 1px 6px rgba(0,0,0,.06);
+    --shadow-modal: 0 16px 48px rgba(0,0,0,.12);
+    --icon-filter: invert(.2);
+    --method-get: #1a7f37;
+    --method-post: #0969da;
+    --method-put: #9a6700;
+    --method-delete: #cf222e;
+    --method-patch: #8250df;
+    --method-head: #0969da;
+    --method-options: #57606a;
+    --status-1xx: #0969da;
+    --status-2xx: #1a7f37;
+    --status-3xx: #9a6700;
+    --status-4xx: #cf222e;
+    --status-5xx: #a40e26;
+    --status-connected-bg: rgba(26,127,55,.08);
+    --status-connected-text: #1a7f37;
+    --status-connecting-bg: rgba(9,105,218,.08);
+    --status-connecting-text: #0969da;
+    --status-disconnected-bg: rgba(207,34,46,.08);
+    --status-disconnected-text: #cf222e;
+    --status-reconnecting-bg: rgba(154,103,0,.08);
+    --status-reconnecting-text: #9a6700;
+    --badge-redirect: #8250df;
 }
