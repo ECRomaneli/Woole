@@ -1,4 +1,8 @@
 async function scanDirectory(path, componentFiles = []) {
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(path) || path.startsWith('//') || path.includes('..')) {
+        throw new Error(`Invalid directory path: ${path}`)
+    }
+
     if (!path.endsWith('/')) { path += '/' }
 
     const response = await fetch(path)
@@ -12,6 +16,7 @@ async function scanDirectory(path, componentFiles = []) {
     for (const link of links) {
         const href = link.getAttribute('href')
         if (href === '../' || href === './' || href === '/' || !href) { continue }
+        if (/^[a-z][a-z0-9+.-]*:\/\//i.test(href) || href.startsWith('//') || href.includes('..')) { continue }
         
         if (href.endsWith('.js')) {
             componentFiles.push({ path: `${path}${href}`, name: href })
